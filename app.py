@@ -56,3 +56,42 @@ if st.button("Run Simulation"):
 else:
     st.info("Click **Run Simulation** to generate results.")
 
+
+
+
+from random_mnq_sim import simulate_market, run_strategy_on, SEED
+
+st.set_page_config(page_title="Random MNQ Strategy Simulator", layout="wide")
+st.title("Random Market Simulator + MNQ Option Strategy")
+
+with st.sidebar:
+    years = st.slider("Years", 1, 20, 5)
+    sigma = st.slider("Annualized Volatility (σ)", 0.10, 0.60, 0.25, 0.01)
+    seed = st.number_input("Random Seed", value=SEED, step=1)
+    run_btn = st.button("Run Simulation")
+
+st.markdown("Simulates a MNQ-like market randomly each run and applies your option strategy.")
+
+if run_btn:
+    prices = simulate_market(years=years, sigma=sigma, seed=int(seed))
+    out = run_strategy_on(prices, seed=int(seed))
+
+    eq = out["equity"]["equity"]
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=eq.index, y=eq, mode="lines", name="Equity"))
+    fig.update_layout(title="Equity Curve", xaxis_title="Date", yaxis_title="$")
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.subheader("Stats")
+    st.dataframe(out["stats"])
+
+    st.subheader("Recent Trades")
+    st.dataframe(out["trades"].tail(50))
+
+    st.download_button("Download trades.csv",
+                       out["trades"].to_csv(index=False).encode(),
+                       "trades.csv", "text/csv")
+else:
+    st.info("Use the sidebar to set parameters and click **Run Simulation**.")
+
+
