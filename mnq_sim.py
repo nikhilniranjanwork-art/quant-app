@@ -10,11 +10,11 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 
-# ----------- Configs you may tweak ----------
+
 SEED = 42
 ROLL_WINDOW = 20            # rolling window for mean/std
-PUT_Z = -1.5                # 1.5 stdev below mean triggers put sell
-CALL_Z = +2.0               # 2.0 stdev above mean triggers covered call
+PUT_Z = -0.5                # 0.5 stdev below mean triggers put sell
+CALL_Z = +0.75              # 0.75 stdev above mean triggers covered call             
 START_EQUITY = 1_000_000.0
 CONTRACT_NOTIONAL = 60_000  # approximate MNQ notional per contract
 RISK_CAP = 1_200_000        # cap on (open puts + held contracts) notional
