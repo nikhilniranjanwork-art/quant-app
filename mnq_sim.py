@@ -1,5 +1,4 @@
-# mnq_sim.py
-# MNQ strategy simulation (robust Yahoo fetch)
+# mnq_sim.py — MNQ strategy simulation (robust Yahoo fetch)
 
 import math
 import random
@@ -10,24 +9,24 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 
-
+# ---------- Config ----------
 SEED = 42
-ROLL_WINDOW = 20            # rolling window for mean/std
-PUT_Z = -0.5                # 0.5 stdev below mean triggers put sell
-CALL_Z = +0.75              # 0.75 stdev above mean triggers covered call             
+ROLL_WINDOW = 20             # rolling window for mean/std
+PUT_Z = -0.5                 # 0.5 stdev below mean triggers put sell
+CALL_Z = +0.75               # 0.75 stdev above mean triggers covered call
 START_EQUITY = 1_000_000.0
-CONTRACT_NOTIONAL = 60_000  # approximate MNQ notional per contract
-RISK_CAP = 1_300_000        # cap on (open puts + held contracts) notional
-POINT_VALUE = 2.0           # USD per MNQ point
-TARGET_POINTS = 250         # +250 points = +$500 per MNQ
+CONTRACT_NOTIONAL = 60_000   # approx MNQ notional / contract
+RISK_CAP = 1_350_000         # cap on (open puts + held longs) notional
+POINT_VALUE = 2.0            # $ per MNQ point
+TARGET_POINTS = 250          # +250 pts = +$500 per MNQ
 PUT_MEAN, PUT_MIN, PUT_MAX, PUT_SIGMA = 105, 80, 130, 10
 CALL_MEAN, CALL_MIN, CALL_MAX, CALL_SIGMA = 135, 100, 170, 12
-ASSIGN_PROB = 0.35          # 35% assignment for sold puts
-# --------------------------------------------
+ASSIGN_PROB = 0.35           # 35% assignment probability per sold put
 
 random.seed(SEED)
 np.random.seed(SEED)
 
+# ---------- Data structures ----------
 @dataclass
 class PutTicket:
     open_day: pd.Timestamp
@@ -46,10 +45,10 @@ class CallTicket:
 @dataclass
 class LongMNQ:
     entry_day: pd.Timestamp
-    entry_price: float           # index level
-    contracts: int               # positive count
+    entry_price: float
+    contracts: int
 
-# ---------- utils ----------
+# ---------- Utils ----------
 def clipped_normal(mean: float, sigma: float, low: float, high: float) -> float:
     x = np.random.normal(mean, sigma)
     return float(np.clip(x, low, high))
@@ -71,12 +70,8 @@ def cagr(equity: pd.Series, periods_per_year: int = 252) -> float:
     years = len(equity) / periods_per_year
     return float((equity.iloc[-1] / equity.iloc[0]) ** (1 / years) - 1)
 
-# ---------- robust Yahoo fetch ----------
+# ---------- Robust Yahoo fetch ----------
 def fetch_mnq_20y() -> pd.DataFrame:
-    """
-    Fetch 20 years of MNQ=F daily bars.
-    Handles both single-level and MultiIndex columns, and falls back to Adj Close.
-    """
     df = yf.download(
         "MNQ=F",
         period="20y",
@@ -85,26 +80,19 @@ def fetch_mnq_20y() -> pd.DataFrame:
         progress=False,
         group_by="column",
     )
-
     if df is None or len(df) == 0:
-        raise RuntimeError("No data returned for MNQ=F. Try again or adjust period/interval.")
+        raise RuntimeError("No data returned for MNQ=F.")
 
-    # If MultiIndex (e.g., columns like ('Open','MNQ=F')), reduce to single frame
+    # Flatten possible MultiIndex
     if isinstance(df.columns, pd.MultiIndex):
-        # common patterns: level 0 is OHLCV, level 1 is ticker
-        # Bring it to single-level by selecting the ticker if present
         tickers = set(df.columns.get_level_values(-1))
         if "MNQ=F" in tickers:
             df = df.xs("MNQ=F", axis=1, level=-1, drop_level=True)
 
-    # Normalize column names
     df.columns = [str(c).strip().lower() for c in df.columns]
-
-    # Some futures return 'adj close' but not 'close' when auto_adjust=False
     if "close" not in df.columns and "adj close" in df.columns:
         df["close"] = df["adj close"]
 
-    # Minimal validation
     required = {"open", "high", "low", "close"}
     if not required.issubset(set(df.columns)):
         raise RuntimeError(f"Expected columns {required}, got {set(df.columns)}")
@@ -123,14 +111,14 @@ def add_zscores(df: pd.DataFrame, window: int = ROLL_WINDOW) -> pd.DataFrame:
     out["z"] = (out["close"] - out["ma"]) / out["sd"]
     return out
 
-# ---------- main sim ----------
+# ---------- Simulation ----------
 def run_sim() -> Dict[str, pd.DataFrame]:
     data = fetch_mnq_20y()
     df = add_zscores(data)
 
     cash = START_EQUITY
     equity_curve = []
-    positions: List[LongMNQ] = []       # open MNQ longs (from assignments)
+    positions: List[LongMNQ] = []
     open_puts: List[PutTicket] = []
     open_calls: List[CallTicket] = []
     trade_log_rows = []
@@ -146,13 +134,13 @@ def run_sim() -> Dict[str, pd.DataFrame]:
         row = df.loc[day]
         price = float(row["close"])
 
-        # 1) Expirations (puts T+1, calls T+2)
+        # 1) Handle expirations
         if open_puts:
-            still_open_puts = []
+            still_open_puts: List[PutTicket] = []
             for t in open_puts:
                 if day >= t.expires_on:
                     if t.assigned_contracts > 0:
-                        positions.append(LongMNQ(entry_day=day, entry_price=price, contracts=t.assigned_contracts))
+                        positions.append(LongMNQ(day, price, t.assigned_contracts))
                         trade_log_rows.append({
                             "date": day, "type": "ASSIGN_PUT",
                             "contracts": t.assigned_contracts, "price": price,
@@ -163,9 +151,9 @@ def run_sim() -> Dict[str, pd.DataFrame]:
             open_puts = still_open_puts
 
         if open_calls:
-            open_calls = [t for t in open_calls if day < t.expires_on]  # calls simply expire; premium was collected
+            open_calls = [t for t in open_calls if day < t.expires_on]
 
-        # 2) Manage open longs: close at +250 pts
+        # 2) Exit longs at +250 pts
         still_positions: List[LongMNQ] = []
         for p in positions:
             points_up = price - p.entry_price
@@ -174,8 +162,9 @@ def run_sim() -> Dict[str, pd.DataFrame]:
                 cash += realized
                 trade_log_rows.append({
                     "date": day, "type": "CLOSE_LONG",
-                    "contracts": p.contracts, "entry_price": p.entry_price, "exit_price": price,
-                    "points": points_up, "pnl_usd": realized, "cash_change": realized
+                    "contracts": p.contracts, "entry_price": p.entry_price,
+                    "exit_price": price, "points": points_up,
+                    "pnl_usd": realized, "cash_change": realized
                 })
             else:
                 still_positions.append(p)
@@ -185,26 +174,22 @@ def run_sim() -> Dict[str, pd.DataFrame]:
         z = row["z"]
         current_notional = used_notional()
 
-            # (a) Put-selling trigger
-            if not math.isnan(z) and z <= PUT_Z:
-                max_contracts = max(0, (RISK_CAP - current_notional) // CONTRACT_NOTIONAL)
-    # OLD:
-    # n = min(random.choice([1, 2]), max_contracts)
-    # NEW: choose randomly between 5 and 7, but don't exceed capacity
-                n = min(random.choice([5, 6, 7]), max_contracts)
-                if n > 0:
-        prem = clipped_normal(PUT_MEAN, PUT_SIGMA, PUT_MIN, PUT_MAX)
-        assigned = sum(1 for _ in range(n) if random.random() < ASSIGN_PROB)
-        cash_change = prem * n
-        cash += cash_change
-        exp_day = dates[i + 1] if (i + 1) < len(dates) else day  # last day safety
-        open_puts.append(PutTicket(day, n, prem, exp_day, assigned))
-        trade_log_rows.append({
-            "date": day, "type": "SELL_PUT",
-            "contracts": n, "premium_per_contract": prem,
-            "cash_change": cash_change, "note": f"assigned_prob={ASSIGN_PROB}, assigned={assigned}"
-        })
-
+        # (a) Put-selling trigger
+        if not math.isnan(z) and z <= PUT_Z:
+            max_contracts = max(0, (RISK_CAP - current_notional) // CONTRACT_NOTIONAL)
+            # random 5–7 puts, respecting capacity
+            n = min(random.choice([5, 6, 7]), max_contracts)
+            if n > 0:
+                prem = clipped_normal(PUT_MEAN, PUT_SIGMA, PUT_MIN, PUT_MAX)
+                assigned = sum(1 for _ in range(n) if random.random() < ASSIGN_PROB)
+                cash_change = prem * n
+                cash += cash_change
+                exp_day = dates[i + 1] if (i + 1) < len(dates) else day
+                open_puts.append(PutTicket(day, n, prem, exp_day, assigned))
+                trade_log_rows.append({
+                    "date": day, "type": "SELL_PUT",
+                    "contracts": n, "premium_per_contract": prem,
+                    "cash_change": cash_change, "note": f"assigned_prob={ASSIGN_PROB}, assigned={assigned}"
                 })
 
         # (b) Covered call trigger
@@ -234,21 +219,22 @@ def run_sim() -> Dict[str, pd.DataFrame]:
 
     eq_df = pd.DataFrame(equity_curve).set_index("date")
     ret = eq_df["equity"].pct_change().fillna(0.0)
+
+    # add utilization stats
     stats = pd.Series({
         "Final Equity": eq_df["equity"].iloc[-1],
         "CAGR": cagr(eq_df["equity"]),
         "Sharpe": sharpe(ret),
         "Max Drawdown": max_drawdown(eq_df["equity"]),
         "Total Trades": len(trade_log_rows),
+        "Max Open Puts": int(eq_df["open_puts"].max()),
+        "Max Held MNQ": int(eq_df["held_contracts"].max()),
+        "Avg Open Puts": float(eq_df["open_puts"].mean()),
+        "Avg Held MNQ": float(eq_df["held_contracts"].mean()),
     })
 
     trades = pd.DataFrame(trade_log_rows).sort_values("date").reset_index(drop=True)
-    return {
-        "equity": eq_df,
-        "returns": ret.to_frame("ret"),
-        "trades": trades,
-        "stats": stats.to_frame("value"),
-    }
+    return {"equity": eq_df, "returns": ret.to_frame("ret"), "trades": trades, "stats": stats.to_frame("value")}
 
 if __name__ == "__main__":
     out = run_sim()
@@ -258,4 +244,4 @@ if __name__ == "__main__":
     out["stats"].to_csv("mnq_stats.csv")
     print("\n=== Summary ===")
     print(out["stats"])
-    print("\nSaved: mnq_equity.csv, mnq_returns.csv, mnq_trades.csv, mnq_stats.csv")
+
