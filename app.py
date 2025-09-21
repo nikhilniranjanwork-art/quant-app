@@ -126,10 +126,10 @@ Welcome to my interactive market simulation platform.
 
 My name is **Nikhil Niranjan**, and from a young age I’ve had a deep-rooted passion for financial markets.  
 Starting with paper trading stocks as a child later, I ventured into options trading in middle school, successfully growing a modest account of just a few hundred dollars into **$10,000**.
-I utlizied various options strategies on the ticker TQQQ such as spreads and simple short options looking for slight statistical edges.
+I utlizied various options strategies on the ticker TQQQ such as spreads and short options looking for slight statistical edges.
 
-My journey continued through college, where I embraced **futures options** for their capital efficiency as the premium I collected in short puts and calls was equivalent to that of putting down 60,000 dollars worth of notional value leading it to be the most optimal choice.  
-This strategic choice allowed me to enhance portfolio leverage dynamically where I can adjust the level of leverage in my portfolio seamlessly.  
+My journey continued through college, where I embraced **futures options** for their capital efficiency.  
+This strategic choice allowed me to enhance portfolio leverage dynamically.  
 Over the last two years, I’ve applied these tactics consistently, growing my capital from ten thousand to thirty five thousand, even amidst significant market volatility.  
 
 My focus on the **MNQ index** is driven by its high volatility and premium opportunities.  
