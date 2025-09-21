@@ -186,20 +186,25 @@ def run_sim() -> Dict[str, pd.DataFrame]:
         current_notional = used_notional()
 
         # (a) Put-selling trigger
-        if not math.isnan(z) and z <= PUT_Z:
-            max_contracts = max(0, (RISK_CAP - current_notional) // CONTRACT_NOTIONAL)
-            n = min(random.choice([1, 2]), max_contracts)
-            if n > 0:
-                prem = clipped_normal(PUT_MEAN, PUT_SIGMA, PUT_MIN, PUT_MAX)
-                assigned = sum(1 for _ in range(n) if random.random() < ASSIGN_PROB)
-                cash_change = prem * n
-                cash += cash_change
-                exp_day = dates[i + 1] if (i + 1) < len(dates) else day  # last day safety
-                open_puts.append(PutTicket(day, n, prem, exp_day, assigned))
-                trade_log_rows.append({
-                    "date": day, "type": "SELL_PUT",
-                    "contracts": n, "premium_per_contract": prem,
-                    "cash_change": cash_change, "note": f"assigned_prob={ASSIGN_PROB}, assigned={assigned}"
+if not math.isnan(z) and z <= PUT_Z:
+    max_contracts = max(0, (RISK_CAP - current_notional) // CONTRACT_NOTIONAL)
+    # OLD:
+    # n = min(random.choice([1, 2]), max_contracts)
+    # NEW: choose randomly between 5 and 7, but don't exceed capacity
+    n = min(random.choice([5, 6, 7]), max_contracts)
+    if n > 0:
+        prem = clipped_normal(PUT_MEAN, PUT_SIGMA, PUT_MIN, PUT_MAX)
+        assigned = sum(1 for _ in range(n) if random.random() < ASSIGN_PROB)
+        cash_change = prem * n
+        cash += cash_change
+        exp_day = dates[i + 1] if (i + 1) < len(dates) else day  # last day safety
+        open_puts.append(PutTicket(day, n, prem, exp_day, assigned))
+        trade_log_rows.append({
+            "date": day, "type": "SELL_PUT",
+            "contracts": n, "premium_per_contract": prem,
+            "cash_change": cash_change, "note": f"assigned_prob={ASSIGN_PROB}, assigned={assigned}"
+        })
+
                 })
 
         # (b) Covered call trigger
