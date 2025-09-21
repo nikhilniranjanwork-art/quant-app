@@ -185,14 +185,14 @@ def run_sim() -> Dict[str, pd.DataFrame]:
         z = row["z"]
         current_notional = used_notional()
 
-        # (a) Put-selling trigger
-if not math.isnan(z) and z <= PUT_Z:
-    max_contracts = max(0, (RISK_CAP - current_notional) // CONTRACT_NOTIONAL)
+            # (a) Put-selling trigger
+            if not math.isnan(z) and z <= PUT_Z:
+                max_contracts = max(0, (RISK_CAP - current_notional) // CONTRACT_NOTIONAL)
     # OLD:
     # n = min(random.choice([1, 2]), max_contracts)
     # NEW: choose randomly between 5 and 7, but don't exceed capacity
-    n = min(random.choice([5, 6, 7]), max_contracts)
-    if n > 0:
+                n = min(random.choice([5, 6, 7]), max_contracts)
+                if n > 0:
         prem = clipped_normal(PUT_MEAN, PUT_SIGMA, PUT_MIN, PUT_MAX)
         assigned = sum(1 for _ in range(n) if random.random() < ASSIGN_PROB)
         cash_change = prem * n
