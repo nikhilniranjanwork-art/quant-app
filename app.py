@@ -119,8 +119,8 @@ st.markdown(
 st.title("My Quant Trading Strategy App")
 
 st.subheader("Background / About")
-st.markdown(
-    """
+
+
 INTRO_TEXT = """
 Welcome to my interactive market simulation platform.
 
@@ -133,7 +133,7 @@ My focus on the **MNQ index** is driven by its high volatility and premium oppor
 I invite you to explore this simulation, adjust the parameters, and analyze the outcomes — with the goal of building clarity, repeatability, and long-term success in trading.
 """
 
-"""
+
 )
 
 # -------------------------------------------------
