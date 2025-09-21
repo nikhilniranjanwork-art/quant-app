@@ -1,5 +1,5 @@
 import streamlit as st
-
+from __future__ import annotations
 st.title("My Quant Trading Strategy App")
 
 st.write("👋 Welcome! This is a starter Streamlit app.")
