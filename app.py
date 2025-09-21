@@ -133,7 +133,7 @@ Explore the simulations, tweak the parameters, and study the results — the goa
 
 
 
-)
+
 
 # -------------------------------------------------
 # Historical MNQ=F backtest
