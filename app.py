@@ -116,7 +116,7 @@ st.markdown(
 # -------------------------------------------------
 # Intro / About
 # -------------------------------------------------
-st.title("My Quant Trading Strategy App")
+st.title("Quantitative Approach to Futures Options on ticker /MNQ")
 
 st.subheader("Background / About")
 
@@ -125,10 +125,11 @@ st.markdown(
 Welcome to my interactive market simulation platform.  
 
 My name is **Nikhil Niranjan**, and from a young age I’ve had a deep-rooted passion for financial markets.  
-Starting with paper trading as a child, I ventured into options trading in middle school, successfully growing a modest account of just a few hundred dollars into **$10,000**.  
+Starting with paper trading stocks as a child later, I ventured into options trading in middle school, successfully growing a modest account of just a few hundred dollars into **$10,000**.
+I utlizied various options strategies on the ticker TQQQ such as spreads and simple short options looking for slight statistical edges.
 
-My journey continued through college, where I embraced **futures options** for their capital efficiency.  
-This strategic choice allowed me to enhance portfolio leverage dynamically.  
+My journey continued through college, where I embraced **futures options** for their capital efficiency as the premium I collected in short puts and calls was equivalent to that of putting down 60,000 dollars worth of notional value leading it to be the most optimal choice.  
+This strategic choice allowed me to enhance portfolio leverage dynamically where I can adjust the level of leverage in my portfolio seamlessly.  
 Over the last two years, I’ve applied these tactics consistently, growing my capital from ten thousand to thirty five thousand, even amidst significant market volatility.  
 
 My focus on the **MNQ index** is driven by its high volatility and premium opportunities.  
@@ -136,6 +137,7 @@ With careful risk management and disciplined execution, it aligns perfectly with
 
 I invite you to explore this simulation, adjust the parameters, and analyze the outcomes —  
 with the goal of building clarity, repeatability, and long-term success in trading.
+First simulation is a model of how my strategy would have performed in the past recent years and the second simulation is a random market simulator to see how my options strategy performs given completely random circumstances. 
 """
 )
 
@@ -147,7 +149,7 @@ with the goal of building clarity, repeatability, and long-term success in tradi
 # -------------------------------------------------
 # Historical MNQ=F backtest
 # -------------------------------------------------
-st.header("Historical MNQ=F Strategy — 20-Year Backtest")
+st.header("Historical MNQ=F Strategy — 6-Year Backtest")
 st.caption(
     "Fetches 20y MNQ futures (Yahoo). Rules: sell puts at −0.5σ (T+1, 35% assignment), "
     "close longs at +250 points, sell covered calls at +0.75σ."
