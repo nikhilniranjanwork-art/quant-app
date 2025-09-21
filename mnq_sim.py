@@ -178,7 +178,7 @@ def run_sim() -> Dict[str, pd.DataFrame]:
         if not math.isnan(z) and z <= PUT_Z:
             max_contracts = max(0, (RISK_CAP - current_notional) // CONTRACT_NOTIONAL)
             # random 5–7 puts, respecting capacity
-            n = min(random.choice([6, 7, 8]), max_contracts)
+            n = min(random.choice([5, 6, 7]), max_contracts)
             if n > 0:
                 prem = clipped_normal(PUT_MEAN, PUT_SIGMA, PUT_MIN, PUT_MAX)
                 assigned = sum(1 for _ in range(n) if random.random() < ASSIGN_PROB)
