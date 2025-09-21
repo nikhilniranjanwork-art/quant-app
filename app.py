@@ -130,6 +130,10 @@ Today I focus on **MNQ** because its volatility and premium dynamics fit my stra
 Explore the simulations, tweak the parameters, and study the results — the goal is clarity, repeatability, and growth.
 """
 )
+
+
+
+)
 INTRO_HTML = """
 <p>Welcome to my interactive market simulation platform.</p>
 
@@ -144,10 +148,6 @@ INTRO_HTML = """
 
 # IMPORTANT: one function call, one closing parenthesis, nothing extra below.
 st.markdown(INTRO_HTML, unsafe_allow_html=True)
-
-
-)
-
 # -------------------------------------------------
 # Historical MNQ=F backtest
 # -------------------------------------------------
