@@ -129,7 +129,7 @@ Starting with paper trading as a child, I ventured into options trading in middl
 
 My journey continued through college, where I embraced **futures options** for their capital efficiency.  
 This strategic choice allowed me to enhance portfolio leverage dynamically.  
-Over the last two years, I’ve applied these tactics consistently, growing my capital from **$10,000  to  $35,000**, even amidst significant market volatility.  
+Over the last two years, I’ve applied these tactics consistently, growing my capital from $10,000  to  $35,000, even amidst significant market volatility.  
 
 My focus on the **MNQ index** is driven by its high volatility and premium opportunities.  
 With careful risk management and disciplined execution, it aligns perfectly with my trading methodology.  
