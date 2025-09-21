@@ -134,20 +134,7 @@ Explore the simulations, tweak the parameters, and study the results — the goa
 
 
 )
-INTRO_HTML = """
-<p>Welcome to my interactive market simulation platform.</p>
 
-<p>My name is <strong>Nikhil Niranjan</strong>, and from a young age I’ve had a deep-rooted passion for financial markets. Starting with paper trading as a child, I ventured into options trading in middle school, successfully growing a modest account of just a few hundred dollars into <strong>$10,000</strong>.</p>
-
-<p>My journey continued through college, where I embraced <strong>futures options</strong> for their capital efficiency. This strategic choice allowed me to enhance portfolio leverage dynamically. Over the last two years, I’ve applied these tactics consistently, growing my capital from <strong>$10,000</strong> to <strong>$35,000</strong>, even amidst significant market volatility.</p>
-
-<p>My focus on the <strong>MNQ index</strong> is driven by its high volatility and premium opportunities. With careful risk management and disciplined execution, it aligns perfectly with my trading methodology.</p>
-
-<p>I invite you to explore this simulation, adjust the parameters, and analyze the outcomes — with the goal of building clarity, repeatability, and long-term success in trading.</p>
-"""
-
-# IMPORTANT: one function call, one closing parenthesis, nothing extra below.
-st.markdown(INTRO_HTML, unsafe_allow_html=True)
 # -------------------------------------------------
 # Historical MNQ=F backtest
 # -------------------------------------------------
