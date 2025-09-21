@@ -17,7 +17,7 @@ PUT_Z = -0.5                # 0.5 stdev below mean triggers put sell
 CALL_Z = +0.75              # 0.75 stdev above mean triggers covered call             
 START_EQUITY = 1_000_000.0
 CONTRACT_NOTIONAL = 60_000  # approximate MNQ notional per contract
-RISK_CAP = 1_350_000        # cap on (open puts + held contracts) notional
+RISK_CAP = 1_300_000        # cap on (open puts + held contracts) notional
 POINT_VALUE = 2.0           # USD per MNQ point
 TARGET_POINTS = 250         # +250 points = +$500 per MNQ
 PUT_MEAN, PUT_MIN, PUT_MAX, PUT_SIGMA = 105, 80, 130, 10
