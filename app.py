@@ -17,8 +17,8 @@ st.set_page_config(page_title="MNQ Strategy – Interactive", layout="wide")
 st.title("MNQ Put/Call Strategy — 20-Year Simulation")
 
 st.markdown(
-    "Press **Run Simulation** to fetch 20y MNQ data, sell puts at −1.5σ, "
-    "simulate assignments (35%), close longs at +250 pts, and sell covered calls at +2σ."
+    "Press **Run Simulation** to fetch 20y MNQ data, sell puts at −0.5σ, "
+    "simulate assignments (35%), close longs at +250 pts, and sell covered calls at +0.75σ."
 )
 
 if st.button("Run Simulation"):
