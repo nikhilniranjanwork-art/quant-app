@@ -10,13 +10,25 @@ st.set_page_config(page_title="Quant Trading Strategy App", layout="wide")
 # Global turquoise hacker theme
 st.markdown("""
     <style>
-    body {
-        background-color: black;
-        color: #40E0D0;
-    }
-    .stMarkdown, .stMetric, .stDataFrame, .stDownloadButton, .stTextInput, .stNumberInput, .stSlider label, .stButton button {
+    /* Set the whole page background */
+    html, body, [class*="css"]  {
+        background-color: black !important;
         color: #40E0D0 !important;
     }
+
+    /* Sidebar background */
+    section[data-testid="stSidebar"] {
+        background-color: black !important;
+    }
+
+    /* Make text turquoise everywhere */
+    .stMarkdown, .stMetric, .stDataFrame, .stDownloadButton,
+    .stTextInput, .stNumberInput, .stSlider label, .stButton button,
+    .stCaption, .stSubheader, .stHeader, .stTitle {
+        color: #40E0D0 !important;
+    }
+
+    /* Button styling */
     .stButton button {
         background-color: black !important;
         color: #40E0D0 !important;
@@ -28,16 +40,23 @@ st.markdown("""
         background-color: #40E0D0 !important;
         color: black !important;
     }
+
+    /* Slider knobs and bars */
     .stSlider > div > div > div {
         background: #40E0D0 !important;
     }
+
+    /* Metrics */
     .stMetric {
         border: 2px solid #40E0D0;
         border-radius: 10px;
         padding: 10px;
         text-align: center;
         color: #40E0D0 !important;
+        background-color: black !important;
     }
+
+    /* Headings */
     h1, h2, h3, h4 {
         color: #40E0D0 !important;
     }
