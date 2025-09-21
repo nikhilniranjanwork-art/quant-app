@@ -230,8 +230,10 @@ def equity_block(out, title="Equity Curve"):
 # ======================== Intro + Background Text ========================
 st.title("My Quant Trading Strategy App")
 
-# Show your editable background/bio text (Edit INTRO_TEXT at top of this file)
-st.markdown('<div class="bio-card">' + st._utils.escape_markdown(INTRO_TEXT, False) + '</div>', unsafe_allow_html=True)
+# Render your editable background/bio text inside a neon card
+st.markdown('<div class="bio-card">', unsafe_allow_html=True)
+st.markdown(INTRO_TEXT)  # Markdown is rendered normally
+st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("---")
 
