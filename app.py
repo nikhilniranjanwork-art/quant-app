@@ -1,77 +1,52 @@
 # app.py — Historical MNQ=F + Random Market sims
-# Neon-green theme, roomy charts, metric cards, optional background image
+# Neon-green hacker theme, roomy charts, metric cards, and a typed “Background/About” section.
 
-import base64
 import inspect
-import io
 from typing import Optional
 
 import streamlit as st
 import plotly.graph_objects as go
 
-# Engines (keep filenames the same)
-from mnq_sim import run_sim
-from random_mnq_sim import simulate_market, run_strategy_on, SEED
+# === EDIT THIS TEXT: your on-page "Background/About" section ==================
+INTRO_TEXT = """
+**Background / About**
+
+Welcome to my interactive market simulation platform. My name is **Nikhil Niranjan**.
+From a young age I’ve had a deep-rooted passion for financial markets. Starting with
+paper trading, I got into options trading early and grew a modest account through
+structured risk-taking and disciplined methodology. Today I focus on **MNQ** because
+its volatility and premium dynamics fit my strategy. Explore the simulations, tweak
+the parameters, and study the results — the goal is clarity, repeatability, and growth.
+"""
+# ==============================================================================
 
 
 # ======================== Page Config ========================
 st.set_page_config(page_title="MNQ Strategy — Interactive", layout="wide")
 
 
-# ======================== Background Helpers ========================
-def css_background(url: Optional[str] = None, b64: Optional[str] = None, opacity: float = 0.12):
-    """
-    Inject CSS to set a global page background image.
-    - Provide either a URL or a base64 string (b64) from an uploaded file.
-    - `opacity` controls a dark overlay so neon text remains readable.
-    """
-    if url:
-        bg_src = f"url('{url}')"
-    elif b64:
-        bg_src = f"url('data:image/png;base64,{b64}')"
-    else:
-        bg_src = "none"
-
-    st.markdown(
-        f"""
-<style>
-/* Global page background (image + dark overlay) */
-html, body, .stApp, [data-testid="stAppViewContainer"] {{
-  background-color: #000 !important;
-  color: #39ff14 !important;
-  background-image: {bg_src};
-  background-size: cover;
-  background-position: center center;
-  background-attachment: fixed;
-}}
-/* Dark overlay for readability */
-.stApp::before {{
-  content: "";
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,{opacity});
-  pointer-events: none;
-  z-index: 0;
-}}
-/* Bring main content above overlay */
-.block-container, [data-testid="stSidebar"], [data-testid="stHeader"] {{
-  position: relative; z-index: 1;
-}}
-</style>
-""",
-        unsafe_allow_html=True,
-    )
-
-
-def file_to_base64(file) -> str:
-    return base64.b64encode(file.read()).decode("utf-8")
-
-
 # ======================== Neon Hacker Theme CSS ========================
 st.markdown(
     """
 <style>
-/* Content width + base colors */
+/* Force global black + neon text */
+html, body, .stApp, [data-testid="stAppViewContainer"],
+[data-testid="stHeader"], [data-testid="stSidebar"]{
+  background-color: #000 !important;
+  color: #39ff14 !important;
+}
+
+/* Sidebar hard overrides (it sometimes keeps light colors) */
+[data-testid="stSidebar"] {
+  background: #000 !important;
+  color: #39ff14 !important;
+  border-right: 1px solid #0e2a0c;
+}
+
+/* Content width */
 .block-container { max-width: 1500px; padding-top: 1.2rem; }
+
+/* Typography */
 * { font-family: "Courier New", monospace; }
 h1, h2, h3, h4, h5, h6, p, span, div, label, .stMarkdown, .stCaption {
   color: #39ff14 !important; text-shadow: 0 0 8px #39ff14;
@@ -85,11 +60,18 @@ hr { border:0; height:1px; background:#222; margin: 1.2rem 0; }
   text-shadow: 0 0 6px #39ff14;
 }
 
-/* Inputs/Sliders */
-.stSlider>div>div>div>div { background: #39ff14 !important; }
-.stNumberInput>div>div>input, .stTextInput>div>div>input {
-  color:#39ff14 !important; background:#0a0a0a !important; border:1px solid #135b0f !important;
+/* Inputs — text/number/select/file — force dark */
+input, textarea, select, .stTextInput input, .stNumberInput input,
+[data-baseweb="select"] > div, .stDateInput input, .stFileUploader, .stFileUploader div {
+  background:#0a0a0a !important; color:#39ff14 !important;
+  border: 1px solid #135b0f !important;
 }
+.stFileUploader label { color:#39ff14 !important; }
+
+/* Sliders: rail, track, handle */
+[data-baseweb="slider"]>div>div { background:#0e1f0d !important; }     /* rail */
+[data-baseweb="slider"]>div>div>div { background:#39ff14 !important; }  /* track */
+[data-baseweb="slider"] [role="slider"] { background:#39ff14 !important; border:1px solid #39ff14 !important; }
 
 /* Metric Cards */
 .metric-card {
@@ -104,27 +86,20 @@ hr { border:0; height:1px; background:#222; margin: 1.2rem 0; }
 .stats-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:14px; }
 @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 780px)  { .stats-grid { grid-template-columns: 1fr; } }
+
+/* Neon card for the Background/About text */
+.bio-card {
+  border:1px solid #39ff14; border-radius:16px; padding:14px 18px;
+  background:#060606e6; box-shadow: 0 0 20px rgba(57,255,20,0.25);
+}
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-# ======================== Sidebar: Background Controls ========================
-with st.sidebar:
-    st.subheader("Background Image")
-    bg_url = st.text_input("Paste image URL (optional)")
-    upload = st.file_uploader("…or upload an image", type=["png", "jpg", "jpeg"])
-    bg_b64 = file_to_base64(upload) if upload else None
-    bg_opacity = st.slider("Background dim (overlay)", 0.00, 0.50, 0.12, 0.01)
-
-# Apply background CSS now
-css_background(url=bg_url if bg_url else None, b64=bg_b64, opacity=bg_opacity)
-
-
-# ======================== Intro ========================
-st.title("My Quant Trading Strategy App")
-st.caption("Two live sims: historical MNQ=F backtest + random market simulator (same rules).")
-st.markdown("---")
+# ======================== Engines (keep filenames the same) ===================
+from mnq_sim import run_sim
+from random_mnq_sim import simulate_market, run_strategy_on, SEED
 
 
 # ======================== Helpers ========================
@@ -134,13 +109,11 @@ def format_pct(x):
     except Exception:
         return "—"
 
-
 def fmt_money(x):
     try:
         return f"${float(x):,.0f}"
     except Exception:
         return "—"
-
 
 def get_stat(stats_df, key):
     try:
@@ -148,10 +121,8 @@ def get_stat(stats_df, key):
     except Exception:
         return None
 
-
 def stat_cards(stats_df):
-    """Render pretty metric cards (Final Equity big; others in a responsive grid)."""
-    # Final equity prominent
+    """Render metric cards (Final Equity big; others in a responsive grid)."""
     final_equity = get_stat(stats_df, "Final Equity")
     c1, c2 = st.columns([2.2, 1])
     with c1:
@@ -162,9 +133,8 @@ def stat_cards(stats_df):
             "</div>",
             unsafe_allow_html=True,
         )
-
-    # Other stats
     c2.empty()
+
     container = st.container()
     with container:
         items = []
@@ -177,69 +147,48 @@ def stat_cards(stats_df):
         items.append(("CAGR", format_pct(cagr)))
         items.append(("Sharpe", f"{float(sharpe):.2f}" if sharpe is not None else "—"))
         items.append(("Max Drawdown", format_pct(mdd)))
-        if tot is not None:
-            items.append(("Total Trades", f"{int(tot):,}"))
-        if max_puts is not None:
-            items.append(("Max Open Puts", f"{int(max_puts):,}"))
-        if max_held is not None:
-            items.append(("Max Held MNQ", f"{int(max_held):,}"))
+        if tot is not None: items.append(("Total Trades", f"{int(tot):,}"))
+        if max_puts is not None: items.append(("Max Open Puts", f"{int(max_puts):,}"))
+        if max_held is not None: items.append(("Max Held MNQ", f"{int(max_held):,}"))
 
         html = '<div class="stats-grid">'
         for label, val in items:
-            html += (
-                '<div class="metric-card">'
-                f'<div class="label">{label}</div>'
-                f'<div class="value">{val}</div>'
-                "</div>"
-            )
-        html += "</div>"
+            html += ('<div class="metric-card">'
+                     f'<div class="label">{label}</div>'
+                     f'<div class="value">{val}</div>'
+                     '</div>')
+        html += '</div>'
         st.markdown(html, unsafe_allow_html=True)
 
-
 def plot_equity(eq_series, title):
-    """Plotly chart with dark gray plot area + visible gridlines."""
+    """Plotly chart with dark gray plot area + visible gridlines (not blacked out)."""
     fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=eq_series.index,
-            y=eq_series,
-            mode="lines",
-            name="Equity",
-            line=dict(color="#39ff14", width=2),
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=eq_series.index, y=eq_series,
+        mode="lines", name="Equity",
+        line=dict(color="#39ff14", width=2)
+    ))
     fig.update_layout(
-        title=title,
-        xaxis_title="Date",
-        yaxis_title="$",
-        height=520,
-        margin=dict(l=10, r=10, t=50, b=10),
-        paper_bgcolor="#000000",     # frame
-        plot_bgcolor="#101417",      # dark gray plot area (not black)
+        title=title, xaxis_title="Date", yaxis_title="$",
+        height=520, margin=dict(l=10, r=10, t=50, b=10),
+        paper_bgcolor="#000000",        # frame
+        plot_bgcolor="#101417",         # dark gray plot area
         font=dict(color="#39ff14"),
         xaxis=dict(gridcolor="#1d2a2f", zerolinecolor="#24343b", showgrid=True),
         yaxis=dict(gridcolor="#1d2a2f", zerolinecolor="#24343b", showgrid=True),
     )
     return fig
 
-
 def plot_drawdown(dd_series):
     fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=dd_series.index,
-            y=dd_series,
-            mode="lines",
-            name="Drawdown",
-            line=dict(color="#19ff74", width=1.8),
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=dd_series.index, y=dd_series,
+        mode="lines", name="Drawdown",
+        line=dict(color="#19ff74", width=1.8)
+    ))
     fig.update_layout(
-        title="Drawdown",
-        xaxis_title="Date",
-        yaxis_title="Drawdown",
-        height=280,
-        margin=dict(l=10, r=10, t=40, b=10),
+        title="Drawdown", xaxis_title="Date", yaxis_title="Drawdown",
+        height=280, margin=dict(l=10, r=10, t=40, b=10),
         paper_bgcolor="#000000",
         plot_bgcolor="#101417",
         font=dict(color="#39ff14"),
@@ -247,7 +196,6 @@ def plot_drawdown(dd_series):
         yaxis=dict(gridcolor="#1d2a2f", zerolinecolor="#24343b", showgrid=True),
     )
     return fig
-
 
 def equity_block(out, title="Equity Curve"):
     """Wide chart + compact metric cards + drawdown + downloads."""
@@ -270,19 +218,22 @@ def equity_block(out, title="Equity Curve"):
 
     d1, d2 = st.columns(2)
     with d1:
-        st.download_button(
-            "Download trades CSV",
-            out["trades"].to_csv(index=False).encode(),
-            "trades.csv",
-            "text/csv",
-        )
+        st.download_button("Download trades CSV",
+                           out["trades"].to_csv(index=False).encode(),
+                           "trades.csv", "text/csv")
     with d2:
-        st.download_button(
-            "Download equity CSV",
-            eq_df.to_csv().encode(),
-            "equity.csv",
-            "text/csv",
-        )
+        st.download_button("Download equity CSV",
+                           eq_df.to_csv().encode(),
+                           "equity.csv", "text/csv")
+
+
+# ======================== Intro + Background Text ========================
+st.title("My Quant Trading Strategy App")
+
+# Show your editable background/bio text (Edit INTRO_TEXT at top of this file)
+st.markdown('<div class="bio-card">' + st._utils.escape_markdown(INTRO_TEXT, False) + '</div>', unsafe_allow_html=True)
+
+st.markdown("---")
 
 
 # ======================== Historical MNQ=F ========================
@@ -331,6 +282,5 @@ if run_rand:
         equity_block(rand_out, title="Equity Curve — Random Market")
     except Exception as e:
         st.error(f"Random run failed: {e}")
-
 
 
