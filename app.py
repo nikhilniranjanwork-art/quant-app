@@ -124,19 +124,25 @@ def equity_block(out, title="Equity Curve"):
     eq_df = out["equity"]
     eq = eq_df["equity"]
 
-    col_plot, col_stats = st.columns([7, 5])  # plenty of room for the chart
+    col_plot, col_stats = st.columns([7, 5])
     with col_plot:
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=eq.index, y=eq, mode="lines", name="Equity",
-                                 line=dict(color="#39ff14", width=2)))
+        fig.add_trace(go.Scatter(
+            x=eq.index, y=eq,
+            mode="lines", name="Equity",
+            line=dict(color="#39ff14", width=2)
+        ))
         fig.update_layout(
             title=title,
             xaxis_title="Date",
             yaxis_title="$",
             height=520,
             margin=dict(l=10, r=10, t=50, b=10),
-            paper_bgcolor="#000", plot_bgcolor="#000",
-            font=dict(color="#39ff14")
+            paper_bgcolor="#000",        # frame stays black
+            plot_bgcolor="#111",         # dark gray plot area
+            font=dict(color="#39ff14"),
+            xaxis=dict(gridcolor="#222"),  # subtle grid lines
+            yaxis=dict(gridcolor="#222")
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -144,35 +150,27 @@ def equity_block(out, title="Equity Curve"):
         st.subheader("Key Stats")
         stat_cards(out["stats"])
 
-    # Drawdown (full width)
+    # Drawdown (same idea)
     dd = (eq_df["equity"] / eq_df["equity"].cummax()) - 1.0
     fig2 = go.Figure()
-    fig2.add_trace(go.Scatter(x=dd.index, y=dd, mode="lines", name="Drawdown",
-                              line=dict(color="#19ff74", width=1.8)))
+    fig2.add_trace(go.Scatter(
+        x=dd.index, y=dd,
+        mode="lines", name="Drawdown",
+        line=dict(color="#19ff74", width=1.8)
+    ))
     fig2.update_layout(
         title="Drawdown",
         xaxis_title="Date",
         yaxis_title="Drawdown",
         height=280,
         margin=dict(l=10, r=10, t=40, b=10),
-        paper_bgcolor="#000", plot_bgcolor="#000",
-        font=dict(color="#39ff14")
+        paper_bgcolor="#000",
+        plot_bgcolor="#111",            # dark gray again
+        font=dict(color="#39ff14"),
+        xaxis=dict(gridcolor="#222"),
+        yaxis=dict(gridcolor="#222")
     )
     st.plotly_chart(fig2, use_container_width=True)
-
-    # Trades table (spacious)
-    st.markdown("### Recent Trades")
-    st.dataframe(out["trades"].tail(50), use_container_width=True, height=360)
-
-    d1, d2 = st.columns(2)
-    with d1:
-        st.download_button("Download trades CSV",
-                           out["trades"].to_csv(index=False).encode(),
-                           "trades.csv", "text/csv")
-    with d2:
-        st.download_button("Download equity CSV",
-                           eq_df.to_csv().encode(),
-                           "equity.csv", "text/csv")
 
 # ---------------- Historical MNQ=F ----------------
 st.header("Historical MNQ=F Strategy — 20-Year Backtest")
