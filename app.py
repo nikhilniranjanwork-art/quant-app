@@ -123,13 +123,22 @@ st.subheader("Background / About")
 st.markdown(
     """
 Welcome to my interactive market simulation platform.  
-My name is **Nikhil Niranjan**, and from a young age I’ve had a deep-rooted passion for financial markets.  
-Starting with paper trading, I got into options trading early and grew a modest account through structured risk-taking and disciplined methodology.  
 
-Today I focus on **MNQ** because its volatility and premium dynamics fit my strategy.  
-Explore the simulations, tweak the parameters, and study the results — the goal is clarity, repeatability, and growth.
+My name is **Nikhil Niranjan**, and from a young age I’ve had a deep-rooted passion for financial markets.  
+Starting with paper trading as a child, I ventured into options trading in middle school, successfully growing a modest account of just a few hundred dollars into **$10,000**.  
+
+My journey continued through college, where I embraced **futures options** for their capital efficiency.  
+This strategic choice allowed me to enhance portfolio leverage dynamically.  
+Over the last two years, I’ve applied these tactics consistently, growing my capital from **$10,000** to **$35,000**, even amidst significant market volatility.  
+
+My focus on the **MNQ index** is driven by its high volatility and premium opportunities.  
+With careful risk management and disciplined execution, it aligns perfectly with my trading methodology.  
+
+I invite you to explore this simulation, adjust the parameters, and analyze the outcomes —  
+with the goal of building clarity, repeatability, and long-term success in trading.
 """
 )
+
 
 
 
