@@ -12,35 +12,53 @@ from random_mnq_sim import simulate_market, run_strategy_on, SEED  # random mark
 # ===================== Page / Theme =====================
 st.set_page_config(page_title="MNQ Strategy — Interactive", layout="wide")
 
-# Inline CSS (black background + turquoise + green)
 st.markdown(
     """
 <style>
-:root{
-  --teal:#2dd4bf; --green:#22c55e; --bg:#0b0f14; --bg2:#0f172a; --text:#e5f3f1;
+:root {
+  --neon-green: #39ff14;
+  --bg: #000000;
+  --bg2: #0a0a0a;
 }
-html, body, [data-testid="stAppViewContainer"] { background-color: var(--bg); color: var(--text); }
+html, body, [data-testid="stAppViewContainer"] {
+  background-color: var(--bg);
+  color: var(--neon-green);
+  font-family: 'Courier New', monospace;
+}
 [data-testid="stHeader"] { background: transparent; }
 .block-container { padding-top: 1.2rem; }
-hr { border:0; height:1px; background:#1f2937; margin: 1.2rem 0; }
+hr { border:0; height:1px; background:#222; margin: 1.2rem 0; }
 .stButton>button {
-  border-radius: 12px; border: 1px solid var(--teal);
-  background: linear-gradient(90deg, #064e3b 0%, #065f46 55%, #0d9488 100%);
-  color: white; padding: 0.5rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--neon-green);
+  background: black;
+  color: var(--neon-green);
+  font-weight: bold;
+  text-shadow: 0 0 5px var(--neon-green);
 }
-.stDownloadButton>button { border-radius: 12px; border: 1px solid var(--green); }
-.stSlider>div>div>div>div { background: var(--teal) !important; }
-[data-testid="stMarkdown"] p { color: var(--text); }
+.stDownloadButton>button {
+  border-radius: 10px;
+  border: 1px solid var(--neon-green);
+  background: #0a0a0a;
+  color: var(--neon-green);
+  text-shadow: 0 0 5px var(--neon-green);
+}
+.stSlider>div>div>div>div {
+  background: var(--neon-green) !important;
+}
+[data-testid="stMarkdown"] p,
+[data-testid="stMarkdown"] h1,
+[data-testid="stMarkdown"] h2,
+[data-testid="stMarkdown"] h3,
+[data-testid="stMarkdown"] h4 {
+  color: var(--neon-green) !important;
+  text-shadow: 0 0 10px var(--neon-green);
+}
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-# ===================== Header / Intro =====================
-st.title("My Quant Trading Strategy App")
-
-st.markdown(
-    """
 <b>Welcome!</b> This app showcases two interactive simulations:
 1) a **historical MNQ=F** strategy backtest and 2) a **random market** simulator that
 mimics MNQ behavior. Use each section below to run and explore the results.
